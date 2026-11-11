@@ -13,6 +13,10 @@ on: pull_request
 permissions:
   contents: read
 
+env:
+  # App minimum (composer.json), above the 8.2 that Nextcloud 34 allows
+  PHP_MIN: '8.3'
+
 concurrency:
   group: lint-php-cs-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -29,14 +33,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Get php version
-        id: versions
-        uses: icewind1991/nextcloud-version-matrix@8a7bac6300b2f0f3100088b297995a229558ddba # v1.3.2
-
-      - name: Set up php${{ steps.versions.outputs.php-min }}
+      - name: Set up php${{ env.PHP_MIN }}
         uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2.36.0
         with:
-          php-version: ${{ steps.versions.outputs.php-min }}
+          php-version: ${{ env.PHP_MIN }}
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, sqlite, pdo_sqlite
           coverage: none
           ini-file: development

@@ -17,6 +17,10 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # App minimum (composer.json), above the 8.2 that Nextcloud 34 allows
+  PHP_MIN: '8.3'
+
 jobs:
   matrix:
     runs-on: ubuntu-latest
@@ -32,8 +36,8 @@ jobs:
         id: versions
         uses: icewind1991/nextcloud-version-matrix@8a7bac6300b2f0f3100088b297995a229558ddba # v1.3.2
 
-      - name: Check enforcement of minimum PHP version ${{ steps.versions.outputs.php-min }} in psalm.xml
-        run: grep 'phpVersion="${{ steps.versions.outputs.php-min }}' psalm.xml
+      - name: Check enforcement of minimum PHP version ${{ env.PHP_MIN }} in psalm.xml
+        run: grep "phpVersion=\"$PHP_MIN" psalm.xml
 
   static-analysis:
     runs-on: ubuntu-latest
@@ -50,10 +54,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up php${{ matrix.php-min }}
+      - name: Set up php${{ env.PHP_MIN }}
         uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2.36.0
         with:
-          php-version: ${{ matrix.php-min }}
+          php-version: ${{ env.PHP_MIN }}
           extensions: bz2, ctype, curl, dom, fileinfo, gd, iconv, intl, json, libxml, mbstring, openssl, pcntl, posix, session, simplexml, xmlreader, xmlwriter, zip, zlib, sqlite, pdo_sqlite
           coverage: none
           ini-file: development

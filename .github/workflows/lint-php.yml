@@ -13,6 +13,10 @@ on: pull_request
 permissions:
   contents: read
 
+env:
+  # App minimum (composer.json), above the 8.2 that Nextcloud 34 allows
+  PHP_MIN: '8.3'
+
 concurrency:
   group: lint-php-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -21,7 +25,7 @@ jobs:
   matrix:
     runs-on: ubuntu-latest
     outputs:
-      php-versions: ${{ steps.versions.outputs.php-versions }}
+      php-versions: ${{ steps.php.outputs.versions }}
     steps:
       - name: Checkout app
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -31,6 +35,12 @@ jobs:
       - name: Get version matrix
         id: versions
         uses: icewind1991/nextcloud-version-matrix@8a7bac6300b2f0f3100088b297995a229558ddba # v1.3.2
+
+      - name: Drop PHP versions below ${{ env.PHP_MIN }}
+        id: php
+        env:
+          VERSIONS: ${{ steps.versions.outputs.php-versions }}
+        run: echo "versions=$(jq -c --arg min "$PHP_MIN" 'map(select(tonumber >= ($min | tonumber)))' <<< "$VERSIONS")" >> "$GITHUB_OUTPUT"
 
   php-lint:
     runs-on: ubuntu-latest
