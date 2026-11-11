@@ -12,6 +12,7 @@ en er dus een BSN bekend is, maar geen contactgegevens.
 
 ## Development
 
+- MySQL 8.0+, PostgreSQL 10+ of SQLite (Oracle wordt niet ondersteund)
 Installeer de dependencies (inclusief de tools onder `vendor-bin/`):
 
 ```bash
