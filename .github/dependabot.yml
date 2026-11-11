@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: composer
+    directories:
+      - "/"
+      - "/vendor-bin/*"
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "03:00"
+      timezone: Europe/Amsterdam
+    open-pull-requests-limit: 10

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+  - SPDX-FileCopyrightText: 2026 Marc Schwartz
+  - SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	  xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+	<id>contactgegevensregister</id>
+	<name>Contactgegevens Register</name>
+	<summary>Nextcloud app voor het koppelen van (encrypted) BSNs aan contactgegevens</summary>
+	<description>Nextcloud app voor het koppelen van (encrypted) BSNs aan contactgegevens. Deze app kan gebruikt worden in combinatie met een MijnOmgeving van een gemeente, waar een gebruiker inlogt met DigiD en er dus een BSN bekend is, maar geen contactgegevens.</description>
+	<version>1.0.0</version>
+	<licence>AGPL-3.0-or-later</licence>
+	<author mail="marc.schwartz@yard.nl">Marc Schwartz</author>
+	<namespace>ContactgegevensRegister</namespace>
+	<category>integration</category>
+	<website>https://github.com/yardinternet/nextcloud-contactgegevens-register</website>
+	<bugs>https://github.com/yardinternet/nextcloud-contactgegevens-register/issues</bugs>
+	<repository type="git">https://github.com/yardinternet/nextcloud-contactgegevens-register.git</repository>
+	<dependencies>
+		<nextcloud min-version="34" max-version="35"/>
+	</dependencies>
+</info>
