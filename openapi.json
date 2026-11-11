@@ -3,7 +3,7 @@
     "info": {
         "title": "contactgegevensregister",
         "version": "0.0.1",
-        "description": "Nextcloud app voor het koppelen van (encrypted) BSNs aan contactgegevens",
+        "description": "Afgeschermd register dat gepseudonimiseerde BSN's en KvK-identiteiten koppelt aan versleutelde contactgegevens",
         "license": {
             "name": "AGPL-3.0-or-later"
         }
