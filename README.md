@@ -1,18 +1,21 @@
 # Contactgegevens Register
 
-Nextcloud app voor het koppelen van (encrypted) BSNs aan contactgegevens.
+Afgeschermd register dat een gepseudonimiseerde identiteit (BSN via DigiD, of een bedrijfsidentificatie via
+eHerkenning) koppelt aan geverifieerde, versleutelde e-mailadressen en telefoonnummers en een voorkeurskanaal.
 
-Deze app kan gebruikt worden in combinatie met een MijnOmgeving van een gemeente, waar een gebruiker inlogt met DigiD
-en er dus een BSN bekend is, maar geen contactgegevens.
+De app is bedoeld voor gebruik met de Mijn Omgeving van een gemeente. Daar is na inloggen een BSN of KvK-nummer
+bekend, maar geen contactgegevens. De backend van de Mijn Omgeving pseudonimiseert en versleutelt; het register ziet
+nooit een BSN, KvK-nummer, e-mailadres of telefoonnummer in platte tekst. Veldnamen volgen de API-standaard
+Klantinteracties.
 
 ## Vereisten
 
 - Nextcloud 34 of 35
 - PHP 8.3 of hoger
+- MySQL 8.0+, PostgreSQL 10+ of SQLite (Oracle wordt niet ondersteund)
 
 ## Development
 
-- MySQL 8.0+, PostgreSQL 10+ of SQLite (Oracle wordt niet ondersteund)
 Installeer de dependencies (inclusief de tools onder `vendor-bin/`):
 
 ```bash

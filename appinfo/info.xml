@@ -7,8 +7,8 @@
 	  xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
 	<id>contactgegevensregister</id>
 	<name>Contactgegevens Register</name>
-	<summary>Nextcloud app voor het koppelen van (encrypted) BSNs aan contactgegevens</summary>
-	<description>Nextcloud app voor het koppelen van (encrypted) BSNs aan contactgegevens. Deze app kan gebruikt worden in combinatie met een MijnOmgeving van een gemeente, waar een gebruiker inlogt met DigiD en er dus een BSN bekend is, maar geen contactgegevens.</description>
+	<summary>Afgeschermd register dat gepseudonimiseerde BSN's en KvK-identiteiten koppelt aan versleutelde contactgegevens</summary>
+	<description>Afgeschermd register dat een gepseudonimiseerde identiteit (BSN via DigiD, of een bedrijfsidentificatie via eHerkenning) koppelt aan geverifieerde, versleutelde e-mailadressen en telefoonnummers en een voorkeurskanaal. Bedoeld voor gebruik met de Mijn Omgeving van een gemeente: de backend daarvan pseudonimiseert en versleutelt, zodat het register nooit een BSN, KvK-nummer, e-mailadres of telefoonnummer in platte tekst ziet. Veldnamen volgen de API-standaard Klantinteracties.</description>
 	<version>1.0.0</version>
 	<licence>AGPL-3.0-or-later</licence>
 	<author mail="marc.schwartz@yard.nl">Marc Schwartz</author>
