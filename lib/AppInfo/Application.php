@@ -15,7 +15,7 @@ use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 
 /** @psalm-suppress UnusedClass */
-class Application extends App implements IBootstrap {
+final class Application extends App implements IBootstrap {
 	public const string APP_ID = 'contactgegevensregister';
 
 	/** @psalm-suppress PossiblyUnusedMethod */
@@ -23,9 +23,11 @@ class Application extends App implements IBootstrap {
 		parent::__construct(self::APP_ID);
 	}
 
+	#[\Override]
 	public function register(IRegistrationContext $context): void {
 	}
 
+	#[\Override]
 	public function boot(IBootContext $context): void {
 	}
 }
