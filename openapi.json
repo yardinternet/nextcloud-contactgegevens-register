@@ -234,6 +234,58 @@
                 }
             }
         },
+        "/index.php/apps/contactgegevensregister/api/v1/contactgegevens/{uuid}/verifieer": {
+            "post": {
+                "operationId": "contactgegeven-verify",
+                "summary": "Mark a contactgegeven as verified",
+                "description": "The register sets today's date (UTC). Repeating it keeps the original date; verification can't be undone.",
+                "tags": [
+                    "contactgegeven"
+                ],
+                "security": [
+                    {},
+                    {
+                        "bearer_auth": []
+                    },
+                    {
+                        "basic_auth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "UUID of the contactgegeven",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contactgegeven verified",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Contactgegeven"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Contactgegeven not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/index.php/apps/contactgegevensregister/api/v1/identiteiten": {
             "post": {
                 "operationId": "identiteit-create",

@@ -9,6 +9,7 @@ use OCA\ContactgegevensRegister\Db\Identiteit;
 use OCA\ContactgegevensRegister\Db\IdentiteitMapper;
 use OCA\ContactgegevensRegister\Exception\DubbelContactgegevenException;
 use OCA\ContactgegevensRegister\Service\ContactgegevenService;
+use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\DB\Exception;
 use OCP\IDBConnection;
 use PHPUnit\Framework\TestCase;
@@ -37,7 +38,7 @@ final class ContactgegevenServiceTest extends TestCase {
 		$db->expects($this->once())->method('rollBack');
 
 		$this->expectException(DubbelContactgegevenException::class);
-		(new ContactgegevenService($mapper, $identiteitMapper, $db))
+		(new ContactgegevenService($mapper, $identiteitMapper, $db, $this->createMock(ITimeFactory::class)))
 			->add('0b5b2d8e-6a43-4c1f-9a51-2a3c1f1e7d10', 'email', 'jan@example.org');
 	}
 }

@@ -26,7 +26,6 @@ class ContactgegevenMapper extends QBMapper {
 	 * @throws DoesNotExistException
 	 * @throws MultipleObjectsReturnedException
 	 * @throws Exception
-	 * @psalm-suppress PossiblyUnusedMethod Used by the API, which is not built yet.
 	 */
 	public function findByUuid(string $uuid): Contactgegeven {
 		$qb = $this->db->getQueryBuilder();

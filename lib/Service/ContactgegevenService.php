@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\ContactgegevensRegister\Service;
 
+use DateTimeZone;
 use OCA\ContactgegevensRegister\Db\Contactgegeven;
 use OCA\ContactgegevensRegister\Db\ContactgegevenMapper;
 use OCA\ContactgegevensRegister\Db\Identiteit;
@@ -14,6 +15,7 @@ use OCA\ContactgegevensRegister\Exception\OngeldigeInvoerException;
 use OCA\ContactgegevensRegister\ResponseDefinitions;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\TTransactional;
+use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\DB\Exception;
 use OCP\IDBConnection;
 use Symfony\Component\Uid\Uuid;
@@ -32,6 +34,7 @@ class ContactgegevenService {
 		private readonly ContactgegevenMapper $mapper,
 		private readonly IdentiteitMapper $identiteitMapper,
 		private readonly IDBConnection $db,
+		private readonly ITimeFactory $timeFactory,
 	) {
 	}
 
@@ -92,6 +95,23 @@ class ContactgegevenService {
 	}
 
 	/**
+	 * Marks a contactgegeven as verified today (UTC). Repeating it keeps the original date (ADR 0007, 0010).
+	 *
+	 * @return ContactgegevensRegisterContactgegeven
+	 * @throws NietGevondenException
+	 * @throws Exception
+	 */
+	public function verify(string $uuid): array {
+		$contactgegeven = $this->findContactgegeven($uuid);
+		if ($contactgegeven->getGeverifieerdOp() === null) {
+			$contactgegeven->setGeverifieerdOp($this->timeFactory->now()->setTimezone(new DateTimeZone('UTC'))->setTime(0, 0));
+			$contactgegeven = $this->mapper->update($contactgegeven);
+		}
+
+		return $this->toApiData($contactgegeven);
+	}
+
+	/**
 	 * @throws OngeldigeInvoerException
 	 */
 	private function validate(string $soort, string $waarde): void {
@@ -114,6 +134,27 @@ class ContactgegevenService {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * @throws NietGevondenException
+	 * @throws Exception
+	 */
+	private function findContactgegeven(string $uuid): Contactgegeven {
+		try {
+			return $this->mapper->findByUuid($uuid);
+		} catch (DoesNotExistException) {
+			throw new NietGevondenException('Contactgegeven not found');
+		}
+	}
+
+	/**
+	 * @return ContactgegevensRegisterContactgegeven
+	 * @throws Exception
+	 */
+	private function toApiData(Contactgegeven $contactgegeven): array {
+		$identiteit = $this->identiteitMapper->findById($contactgegeven->getIdentiteitId());
+		return $contactgegeven->toApiData($identiteit->getUuid());
 	}
 
 	/**

@@ -89,4 +89,25 @@ final class ContactgegevenControllerTest extends TestCase {
 		$this->assertSame($status, $response->getStatus());
 		$this->assertSame(['message' => $exception->getMessage()], $response->getData());
 	}
+
+	public function testVerifyReturnsTheContactgegeven(): void {
+		$this->service->expects($this->once())
+			->method('verify')
+			->with(self::CONTACTGEGEVEN['uuid'])
+			->willReturn(self::CONTACTGEGEVEN);
+
+		$response = $this->controller->verify(self::CONTACTGEGEVEN['uuid']);
+
+		$this->assertSame(Http::STATUS_OK, $response->getStatus());
+		$this->assertSame(self::CONTACTGEGEVEN, $response->getData());
+	}
+
+	public function testVerifyReturns404ForUnknownContactgegeven(): void {
+		$this->service->method('verify')->willThrowException(new NietGevondenException('Contactgegeven not found'));
+
+		$response = $this->controller->verify(self::CONTACTGEGEVEN['uuid']);
+
+		$this->assertSame(Http::STATUS_NOT_FOUND, $response->getStatus());
+		$this->assertSame(['message' => 'Contactgegeven not found'], $response->getData());
+	}
 }

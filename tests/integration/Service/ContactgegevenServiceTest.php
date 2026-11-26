@@ -146,6 +146,29 @@ final class ContactgegevenServiceTest extends TestCase {
 		$this->service->add($this->identiteit->getUuid(), $soort, $waarde);
 	}
 
+	public function testVerifySetsTodayAndKeepsTheFirstDate(): void {
+		$contactgegeven = $this->insert('jan@example.org');
+
+		$verified = $this->service->verify($contactgegeven->getUuid());
+
+		$today = (new DateTimeImmutable('now', new DateTimeZone('UTC')))->format('Y-m-d');
+		$this->assertSame($today, $verified['geverifieerdOp']);
+		$this->assertSame($this->identiteit->getUuid(), $verified['identiteit']);
+		$this->assertSame($today, $this->mapper->findByUuid($contactgegeven->getUuid())->getGeverifieerdOp()?->format('Y-m-d'));
+	}
+
+	public function testVerifyKeepsAnEarlierDate(): void {
+		$contactgegeven = $this->insert('jan@example.org', new DateTimeImmutable('2026-01-02'));
+
+		$this->assertSame('2026-01-02', $this->service->verify($contactgegeven->getUuid())['geverifieerdOp']);
+		$this->assertSame('2026-01-02', $this->mapper->findByUuid($contactgegeven->getUuid())->getGeverifieerdOp()?->format('Y-m-d'));
+	}
+
+	public function testVerifyThrowsForUnknownContactgegeven(): void {
+		$this->expectException(NietGevondenException::class);
+		$this->service->verify(Uuid::v4()->toRfc4122());
+	}
+
 	private function insert(string $waarde, ?DateTimeImmutable $geverifieerdOp = null, bool $isPrimair = false): Contactgegeven {
 		$contactgegeven = new Contactgegeven();
 		$contactgegeven->setUuid(Uuid::v4()->toRfc4122());

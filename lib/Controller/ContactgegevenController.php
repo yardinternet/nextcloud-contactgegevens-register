@@ -86,4 +86,26 @@ final class ContactgegevenController extends ApiController {
 			return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_CONFLICT);
 		}
 	}
+
+	/**
+	 * Mark a contactgegeven as verified
+	 *
+	 * The register sets today's date (UTC). Repeating it keeps the original date; verification can't be undone.
+	 *
+	 * @param string $uuid UUID of the contactgegeven
+	 * @return JSONResponse<Http::STATUS_OK, ContactgegevensRegisterContactgegeven, array{}>|JSONResponse<Http::STATUS_NOT_FOUND, ContactgegevensRegisterFout, array{}>
+	 *
+	 * 200: Contactgegeven verified
+	 * 404: Contactgegeven not found
+	 */
+	#[PublicPage]
+	#[NoCSRFRequired]
+	#[FrontpageRoute(verb: 'POST', url: '/api/v1/contactgegevens/{uuid}/verifieer')]
+	public function verify(string $uuid): JSONResponse {
+		try {
+			return new JSONResponse($this->service->verify($uuid));
+		} catch (NietGevondenException $e) {
+			return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
+		}
+	}
 }
