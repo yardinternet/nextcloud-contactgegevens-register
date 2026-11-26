@@ -13,7 +13,6 @@ use OCP\IDBConnection;
 
 /**
  * @template-extends QBMapper<Contactgegeven>
- * @psalm-suppress UnusedClass Used by the API, which is not built yet.
  */
 class ContactgegevenMapper extends QBMapper {
 	public const string TABLE = 'cgr_contactgegeven';
@@ -44,7 +43,6 @@ class ContactgegevenMapper extends QBMapper {
 	 * @param bool|null $geverifieerd true: only verified ones, false: only unverified ones, null: all
 	 * @return list<Contactgegeven>
 	 * @throws Exception
-	 * @psalm-suppress PossiblyUnusedMethod Used by the API, which is not built yet.
 	 */
 	public function findByIdentiteit(int $identiteitId, ?bool $geverifieerd = null): array {
 		$qb = $this->db->getQueryBuilder();

@@ -11,6 +11,15 @@ namespace OCA\ContactgegevensRegister;
  *     uuid: string,
  * }
  *
+ * @psalm-type ContactgegevensRegisterContactgegeven = array{
+ *     uuid: string,
+ *     identiteit: string,
+ *     soort: string,
+ *     waarde: string,
+ *     geverifieerdOp: ?string,
+ *     isPrimair: bool,
+ * }
+ *
  * @psalm-type ContactgegevensRegisterFout = array{
  *     message: string,
  * }

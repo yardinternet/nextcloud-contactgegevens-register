@@ -20,6 +20,38 @@
             }
         },
         "schemas": {
+            "Contactgegeven": {
+                "type": "object",
+                "required": [
+                    "uuid",
+                    "identiteit",
+                    "soort",
+                    "waarde",
+                    "geverifieerdOp",
+                    "isPrimair"
+                ],
+                "properties": {
+                    "uuid": {
+                        "type": "string"
+                    },
+                    "identiteit": {
+                        "type": "string"
+                    },
+                    "soort": {
+                        "type": "string"
+                    },
+                    "waarde": {
+                        "type": "string"
+                    },
+                    "geverifieerdOp": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "isPrimair": {
+                        "type": "boolean"
+                    }
+                }
+            },
             "Fout": {
                 "type": "object",
                 "required": [
@@ -45,6 +77,69 @@
         }
     },
     "paths": {
+        "/index.php/apps/contactgegevensregister/api/v1/identiteiten/{uuid}/contactgegevens": {
+            "get": {
+                "operationId": "contactgegeven-index",
+                "summary": "List the contactgegevens of an identiteit",
+                "tags": [
+                    "contactgegeven"
+                ],
+                "security": [
+                    {},
+                    {
+                        "bearer_auth": []
+                    },
+                    {
+                        "basic_auth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "UUID of the identiteit",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "isGeverifieerd",
+                        "in": "query",
+                        "description": "Only return verified contactgegevens",
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contactgegevens returned, oldest first",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Contactgegeven"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Identiteit not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/index.php/apps/contactgegevensregister/api/v1/identiteiten": {
             "post": {
                 "operationId": "identiteit-create",
@@ -167,6 +262,10 @@
         }
     },
     "tags": [
+        {
+            "name": "contactgegeven",
+            "description": "The endpoints are public until the token system is added (ADR 0001 requires access to be denied by default)."
+        },
         {
             "name": "identiteit",
             "description": "The endpoints are public until the token system is added (ADR 0001 requires access to be denied by default)."

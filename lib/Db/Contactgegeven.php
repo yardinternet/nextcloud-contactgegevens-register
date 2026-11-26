@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\ContactgegevensRegister\Db;
 
 use DateTimeImmutable;
+use OCA\ContactgegevensRegister\ResponseDefinitions;
 use OCP\AppFramework\Db\Entity;
 use OCP\DB\Types;
 
@@ -24,14 +25,7 @@ use OCP\DB\Types;
  * @method bool getIsPrimair()
  * @method void setIsPrimair(bool $isPrimair)
  *
- * @psalm-type ContactgegevenData = array{
- *     uuid: string,
- *     identiteit: string,
- *     soort: string,
- *     waarde: string,
- *     geverifieerdOp: ?string,
- *     isPrimair: bool,
- * }
+ * @psalm-import-type ContactgegevensRegisterContactgegeven from ResponseDefinitions
  *
  * The properties are read and written through Entity's magic accessors, and $id is set by the mapper.
  * @psalm-suppress PossiblyUnusedProperty
@@ -57,8 +51,7 @@ final class Contactgegeven extends Entity {
 	/**
 	 * The API shape. The entity only knows the internal id of its identiteit, so the caller passes the UUID.
 	 *
-	 * @return ContactgegevenData
-	 * @psalm-suppress PossiblyUnusedMethod Used by the API, which is not built yet.
+	 * @return ContactgegevensRegisterContactgegeven
 	 */
 	public function toApiData(string $identiteitUuid): array {
 		return [
