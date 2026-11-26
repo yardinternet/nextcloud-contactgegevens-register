@@ -169,6 +169,31 @@ final class ContactgegevenServiceTest extends TestCase {
 		$this->service->verify(Uuid::v4()->toRfc4122());
 	}
 
+	public function testMakePrimairMovesTheFlagWithinTheSoort(): void {
+		$huidige = $this->insert('a@example.org', isPrimair: true);
+		$nieuwe = $this->insert('b@example.org');
+
+		$result = $this->service->makePrimair($nieuwe->getUuid());
+
+		$this->assertTrue($result['isPrimair']);
+		$this->assertSame($this->identiteit->getUuid(), $result['identiteit']);
+		$this->assertTrue($this->mapper->findByUuid($nieuwe->getUuid())->getIsPrimair());
+		$this->assertFalse($this->mapper->findByUuid($huidige->getUuid())->getIsPrimair());
+	}
+
+	public function testMakePrimairWorksWithoutACurrentPrimaryAndIsIdempotent(): void {
+		$contactgegeven = $this->insert('a@example.org');
+
+		$this->assertTrue($this->service->makePrimair($contactgegeven->getUuid())['isPrimair']);
+		$this->assertTrue($this->service->makePrimair($contactgegeven->getUuid())['isPrimair']);
+		$this->assertSame($contactgegeven->getUuid(), $this->mapper->findPrimair($this->identiteit->getId(), 'email')?->getUuid());
+	}
+
+	public function testMakePrimairThrowsForUnknownContactgegeven(): void {
+		$this->expectException(NietGevondenException::class);
+		$this->service->makePrimair(Uuid::v4()->toRfc4122());
+	}
+
 	private function insert(string $waarde, ?DateTimeImmutable $geverifieerdOp = null, bool $isPrimair = false): Contactgegeven {
 		$contactgegeven = new Contactgegeven();
 		$contactgegeven->setUuid(Uuid::v4()->toRfc4122());

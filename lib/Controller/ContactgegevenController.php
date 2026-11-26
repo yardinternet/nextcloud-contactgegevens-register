@@ -108,4 +108,27 @@ final class ContactgegevenController extends ApiController {
 			return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
 		}
 	}
+
+	/**
+	 * Make a contactgegeven the primary one
+	 *
+	 * Clears the flag on the current primary contactgegeven of the same identiteit and soort. It doesn't have to be
+	 * verified. Repeating it changes nothing.
+	 *
+	 * @param string $uuid UUID of the contactgegeven
+	 * @return JSONResponse<Http::STATUS_OK, ContactgegevensRegisterContactgegeven, array{}>|JSONResponse<Http::STATUS_NOT_FOUND, ContactgegevensRegisterFout, array{}>
+	 *
+	 * 200: Contactgegeven is the primary one
+	 * 404: Contactgegeven not found
+	 */
+	#[PublicPage]
+	#[NoCSRFRequired]
+	#[FrontpageRoute(verb: 'POST', url: '/api/v1/contactgegevens/{uuid}/primair')]
+	public function makePrimair(string $uuid): JSONResponse {
+		try {
+			return new JSONResponse($this->service->makePrimair($uuid));
+		} catch (NietGevondenException $e) {
+			return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
+		}
+	}
 }

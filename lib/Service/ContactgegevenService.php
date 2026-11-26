@@ -112,6 +112,33 @@ class ContactgegevenService {
 	}
 
 	/**
+	 * Makes a contactgegeven the primary one of its identiteit and soort, and clears the flag on the current
+	 * primary one in the same transaction (ADR 0010). It doesn't have to be verified.
+	 *
+	 * @return ContactgegevensRegisterContactgegeven
+	 * @throws NietGevondenException
+	 * @throws Exception
+	 */
+	public function makePrimair(string $uuid): array {
+		$contactgegeven = $this->atomic(function () use ($uuid): Contactgegeven {
+			$contactgegeven = $this->findContactgegeven($uuid);
+			if ($contactgegeven->getIsPrimair()) {
+				return $contactgegeven;
+			}
+
+			$huidige = $this->mapper->findPrimair($contactgegeven->getIdentiteitId(), $contactgegeven->getSoort());
+			if ($huidige !== null) {
+				$huidige->setIsPrimair(false);
+				$this->mapper->update($huidige);
+			}
+			$contactgegeven->setIsPrimair(true);
+			return $this->mapper->update($contactgegeven);
+		}, $this->db);
+
+		return $this->toApiData($contactgegeven);
+	}
+
+	/**
 	 * @throws OngeldigeInvoerException
 	 */
 	private function validate(string $soort, string $waarde): void {

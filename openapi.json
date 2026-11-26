@@ -286,6 +286,58 @@
                 }
             }
         },
+        "/index.php/apps/contactgegevensregister/api/v1/contactgegevens/{uuid}/primair": {
+            "post": {
+                "operationId": "contactgegeven-make-primair",
+                "summary": "Make a contactgegeven the primary one",
+                "description": "Clears the flag on the current primary contactgegeven of the same identiteit and soort. It doesn't have to be verified. Repeating it changes nothing.",
+                "tags": [
+                    "contactgegeven"
+                ],
+                "security": [
+                    {},
+                    {
+                        "bearer_auth": []
+                    },
+                    {
+                        "basic_auth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "UUID of the contactgegeven",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contactgegeven is the primary one",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Contactgegeven"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Contactgegeven not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/index.php/apps/contactgegevensregister/api/v1/identiteiten": {
             "post": {
                 "operationId": "identiteit-create",

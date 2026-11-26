@@ -87,7 +87,6 @@ class ContactgegevenMapper extends QBMapper {
 	 * The primary contactgegeven of an identiteit for a soort, if there is one.
 	 *
 	 * @throws Exception
-	 * @psalm-suppress PossiblyUnusedMethod Used by the API, which is not built yet.
 	 */
 	public function findPrimair(int $identiteitId, string $soort): ?Contactgegeven {
 		$qb = $this->db->getQueryBuilder();
