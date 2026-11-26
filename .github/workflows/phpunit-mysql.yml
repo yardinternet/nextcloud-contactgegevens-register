@@ -16,6 +16,8 @@ permissions:
 env:
   # The repository name differs from the app id
   APP_NAME: contactgegevensregister
+  # App minimum (composer.json), above the 8.2 that Nextcloud 34 allows
+  PHP_MIN: '8.3'
 
 concurrency:
   group: phpunit-mysql-${{ github.head_ref || github.run_id }}
@@ -25,7 +27,7 @@ jobs:
   matrix:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.versions.outputs.sparse-matrix }}
+      matrix: ${{ steps.php.outputs.matrix }}
     steps:
       - name: Checkout app
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -37,6 +39,12 @@ jobs:
         uses: icewind1991/nextcloud-version-matrix@8a7bac6300b2f0f3100088b297995a229558ddba # v1.3.2
         with:
           matrix: '{"mysql-versions": ["8.4"]}'
+
+      - name: Raise PHP versions below ${{ env.PHP_MIN }}
+        id: php
+        env:
+          MATRIX: ${{ steps.versions.outputs.sparse-matrix }}
+        run: echo "matrix=$(jq -c --arg min "$PHP_MIN" '.include |= (map(if (.["php-versions"] | tonumber) < ($min | tonumber) then .["php-versions"] = $min else . end) | unique)' <<< "$MATRIX")" >> "$GITHUB_OUTPUT"
 
   changes:
     runs-on: ubuntu-latest
