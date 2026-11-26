@@ -20,26 +20,24 @@
             }
         },
         "schemas": {
-            "OCSMeta": {
+            "Fout": {
                 "type": "object",
                 "required": [
-                    "status",
-                    "statuscode"
+                    "message"
                 ],
                 "properties": {
-                    "status": {
-                        "type": "string"
-                    },
-                    "statuscode": {
-                        "type": "integer"
-                    },
                     "message": {
                         "type": "string"
-                    },
-                    "totalitems": {
-                        "type": "string"
-                    },
-                    "itemsperpage": {
+                    }
+                }
+            },
+            "Identiteit": {
+                "type": "object",
+                "required": [
+                    "uuid"
+                ],
+                "properties": {
+                    "uuid": {
                         "type": "string"
                     }
                 }
@@ -47,14 +45,16 @@
         }
     },
     "paths": {
-        "/ocs/v2.php/apps/contactgegevensregister/api": {
-            "get": {
-                "operationId": "api-index",
-                "summary": "An example API endpoint",
+        "/index.php/apps/contactgegevensregister/api/v1/identiteiten": {
+            "post": {
+                "operationId": "identiteit-create",
+                "summary": "Find or create the identiteit of an HMAC",
+                "description": "During a key rotation the client also sends the HMAC of the previous key. An identiteit that only has that HMAC is re-keyed and keeps its UUID.",
                 "tags": [
-                    "api"
+                    "identiteit"
                 ],
                 "security": [
+                    {},
                     {
                         "bearer_auth": []
                     },
@@ -62,81 +62,58 @@
                         "basic_auth": []
                     }
                 ],
-                "parameters": [
-                    {
-                        "name": "OCS-APIRequest",
-                        "in": "header",
-                        "description": "Required to be true for the API request to pass",
-                        "required": true,
-                        "schema": {
-                            "type": "boolean",
-                            "default": true
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Data returned",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "required": [
-                                        "ocs"
-                                    ],
-                                    "properties": {
-                                        "ocs": {
-                                            "type": "object",
-                                            "required": [
-                                                "meta",
-                                                "data"
-                                            ],
-                                            "properties": {
-                                                "meta": {
-                                                    "$ref": "#/components/schemas/OCSMeta"
-                                                },
-                                                "data": {
-                                                    "type": "object",
-                                                    "required": [
-                                                        "message"
-                                                    ],
-                                                    "properties": {
-                                                        "message": {
-                                                            "type": "string"
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "hmac"
+                                ],
+                                "properties": {
+                                    "hmac": {
+                                        "type": "string",
+                                        "description": "HMAC-SHA256 of the login identifier, 64 lowercase hexadecimal characters"
+                                    },
+                                    "vorigeHmac": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "default": null,
+                                        "description": "HMAC of the login identifier with the previous key, only during a key rotation"
                                     }
                                 }
                             }
                         }
-                    },
-                    "401": {
-                        "description": "Current user is not logged in",
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Existing identiteit found or re-keyed",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "required": [
-                                        "ocs"
-                                    ],
-                                    "properties": {
-                                        "ocs": {
-                                            "type": "object",
-                                            "required": [
-                                                "meta",
-                                                "data"
-                                            ],
-                                            "properties": {
-                                                "meta": {
-                                                    "$ref": "#/components/schemas/OCSMeta"
-                                                },
-                                                "data": {}
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/Identiteit"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Identiteit created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Identiteit"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid HMAC, or vorigeHmac equals hmac",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
                                 }
                             }
                         }
@@ -145,5 +122,10 @@
             }
         }
     },
-    "tags": []
+    "tags": [
+        {
+            "name": "identiteit",
+            "description": "The endpoints are public until the token system is added (ADR 0001 requires access to be denied by default)."
+        }
+    ]
 }

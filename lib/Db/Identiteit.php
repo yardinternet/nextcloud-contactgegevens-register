@@ -23,7 +23,6 @@ use Override;
  * The properties are read and written through Entity's magic accessors, and $id is set by the mapper.
  * @psalm-suppress PossiblyUnusedProperty
  * @psalm-suppress PropertyNotSetInConstructor
- * @psalm-suppress UnusedClass Used by the API and the purge, which are not built yet.
  */
 final class Identiteit extends Entity implements JsonSerializable {
 	protected string $uuid = '';
