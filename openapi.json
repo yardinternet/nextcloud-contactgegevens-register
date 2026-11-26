@@ -138,6 +138,100 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "operationId": "contactgegeven-create",
+                "summary": "Add a contactgegeven to an identiteit",
+                "description": "The new contactgegeven is not verified. It becomes primary when the identiteit has no other contactgegeven of that soort.",
+                "tags": [
+                    "contactgegeven"
+                ],
+                "security": [
+                    {},
+                    {
+                        "bearer_auth": []
+                    },
+                    {
+                        "basic_auth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "soort",
+                                    "waarde"
+                                ],
+                                "properties": {
+                                    "soort": {
+                                        "type": "string",
+                                        "description": "Kind of contactgegeven, only `email` for now"
+                                    },
+                                    "waarde": {
+                                        "type": "string",
+                                        "description": "The email address"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "UUID of the identiteit",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Contactgegeven added",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Contactgegeven"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid soort or waarde",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Identiteit not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "The identiteit already has this waarde, compared case-insensitively",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/index.php/apps/contactgegevensregister/api/v1/identiteiten": {

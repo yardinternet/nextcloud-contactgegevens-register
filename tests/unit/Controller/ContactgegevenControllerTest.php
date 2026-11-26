@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace OCA\ContactgegevensRegister\Tests\Unit\Controller;
 
 use OCA\ContactgegevensRegister\Controller\ContactgegevenController;
+use OCA\ContactgegevensRegister\Exception\DubbelContactgegevenException;
 use OCA\ContactgegevensRegister\Exception\NietGevondenException;
+use OCA\ContactgegevensRegister\Exception\OngeldigeInvoerException;
 use OCA\ContactgegevensRegister\Service\ContactgegevenService;
 use OCP\AppFramework\Http;
 use OCP\IRequest;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -52,5 +55,38 @@ final class ContactgegevenControllerTest extends TestCase {
 
 		$this->assertSame(Http::STATUS_NOT_FOUND, $response->getStatus());
 		$this->assertSame(['message' => 'Identiteit not found'], $response->getData());
+	}
+
+	public function testCreateReturns201(): void {
+		$this->service->expects($this->once())
+			->method('add')
+			->with(self::IDENTITEIT_UUID, 'email', 'jan@example.org')
+			->willReturn(self::CONTACTGEGEVEN);
+
+		$response = $this->controller->create(self::IDENTITEIT_UUID, 'email', 'jan@example.org');
+
+		$this->assertSame(Http::STATUS_CREATED, $response->getStatus());
+		$this->assertSame(self::CONTACTGEGEVEN, $response->getData());
+	}
+
+	/**
+	 * @return array<string, array{\Exception, int}>
+	 */
+	public static function createErrors(): array {
+		return [
+			'invalid input' => [new OngeldigeInvoerException('waarde must be a valid email address'), Http::STATUS_BAD_REQUEST],
+			'unknown identiteit' => [new NietGevondenException('Identiteit not found'), Http::STATUS_NOT_FOUND],
+			'duplicate' => [new DubbelContactgegevenException('The identiteit already has this email'), Http::STATUS_CONFLICT],
+		];
+	}
+
+	#[DataProvider('createErrors')]
+	public function testCreateMapsErrors(\Exception $exception, int $status): void {
+		$this->service->method('add')->willThrowException($exception);
+
+		$response = $this->controller->create(self::IDENTITEIT_UUID, 'email', 'jan@example.org');
+
+		$this->assertSame($status, $response->getStatus());
+		$this->assertSame(['message' => $exception->getMessage()], $response->getData());
 	}
 }

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace OCA\ContactgegevensRegister\Controller;
 
 use OCA\ContactgegevensRegister\AppInfo\Application;
+use OCA\ContactgegevensRegister\Exception\DubbelContactgegevenException;
 use OCA\ContactgegevensRegister\Exception\NietGevondenException;
+use OCA\ContactgegevensRegister\Exception\OngeldigeInvoerException;
 use OCA\ContactgegevensRegister\ResponseDefinitions;
 use OCA\ContactgegevensRegister\Service\ContactgegevenService;
 use OCP\AppFramework\ApiController;
@@ -51,6 +53,37 @@ final class ContactgegevenController extends ApiController {
 			return new JSONResponse($this->service->findByIdentiteit($uuid, $isGeverifieerd));
 		} catch (NietGevondenException $e) {
 			return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
+		}
+	}
+
+	/**
+	 * Add a contactgegeven to an identiteit
+	 *
+	 * The new contactgegeven is not verified. It becomes primary when the identiteit has no other contactgegeven
+	 * of that soort.
+	 *
+	 * @param string $uuid UUID of the identiteit
+	 * @param string $soort Kind of contactgegeven, only `email` for now
+	 * @param string $waarde The email address
+	 * @return JSONResponse<Http::STATUS_CREATED, ContactgegevensRegisterContactgegeven, array{}>|JSONResponse<Http::STATUS_BAD_REQUEST|Http::STATUS_NOT_FOUND|Http::STATUS_CONFLICT, ContactgegevensRegisterFout, array{}>
+	 *
+	 * 201: Contactgegeven added
+	 * 400: Invalid soort or waarde
+	 * 404: Identiteit not found
+	 * 409: The identiteit already has this waarde, compared case-insensitively
+	 */
+	#[PublicPage]
+	#[NoCSRFRequired]
+	#[FrontpageRoute(verb: 'POST', url: '/api/v1/identiteiten/{uuid}/contactgegevens')]
+	public function create(string $uuid, string $soort, string $waarde): JSONResponse {
+		try {
+			return new JSONResponse($this->service->add($uuid, $soort, $waarde), Http::STATUS_CREATED);
+		} catch (OngeldigeInvoerException $e) {
+			return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_BAD_REQUEST);
+		} catch (NietGevondenException $e) {
+			return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
+		} catch (DubbelContactgegevenException $e) {
+			return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_CONFLICT);
 		}
 	}
 }

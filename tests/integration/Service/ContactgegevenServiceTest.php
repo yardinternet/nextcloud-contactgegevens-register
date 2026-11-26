@@ -10,9 +10,12 @@ use OCA\ContactgegevensRegister\Db\Contactgegeven;
 use OCA\ContactgegevensRegister\Db\ContactgegevenMapper;
 use OCA\ContactgegevensRegister\Db\Identiteit;
 use OCA\ContactgegevensRegister\Db\IdentiteitMapper;
+use OCA\ContactgegevensRegister\Exception\DubbelContactgegevenException;
 use OCA\ContactgegevensRegister\Exception\NietGevondenException;
+use OCA\ContactgegevensRegister\Exception\OngeldigeInvoerException;
 use OCA\ContactgegevensRegister\Service\ContactgegevenService;
 use OCP\Server;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\Uid\Uuid;
 use Test\TestCase;
@@ -87,6 +90,60 @@ final class ContactgegevenServiceTest extends TestCase {
 	public function testFindByIdentiteitThrowsForUnknownIdentiteit(): void {
 		$this->expectException(NietGevondenException::class);
 		$this->service->findByIdentiteit(Uuid::v4()->toRfc4122());
+	}
+
+	public function testAddMakesTheFirstOfASoortPrimary(): void {
+		$first = $this->service->add($this->identiteit->getUuid(), 'email', 'Jan@Example.org');
+		$second = $this->service->add($this->identiteit->getUuid(), 'email', 'piet@example.org');
+
+		$this->assertSame($this->identiteit->getUuid(), $first['identiteit']);
+		$this->assertSame('email', $first['soort']);
+		$this->assertSame('Jan@Example.org', $first['waarde'], 'Stored as received');
+		$this->assertNull($first['geverifieerdOp']);
+		$this->assertTrue($first['isPrimair']);
+		$this->assertFalse($second['isPrimair']);
+		$this->assertSame(
+			[$first, $second],
+			$this->service->findByIdentiteit($this->identiteit->getUuid()),
+		);
+	}
+
+	public function testAddDoesNotMakeItPrimaryWhenOthersOfTheSoortExistWithoutAPrimary(): void {
+		$this->insert('a@example.org');
+
+		$added = $this->service->add($this->identiteit->getUuid(), 'email', 'b@example.org');
+
+		$this->assertFalse($added['isPrimair']);
+	}
+
+	public function testAddRejectsADuplicateComparedCaseInsensitively(): void {
+		$this->service->add($this->identiteit->getUuid(), 'email', 'jan@example.org');
+
+		$this->expectException(DubbelContactgegevenException::class);
+		$this->service->add($this->identiteit->getUuid(), 'email', 'JAN@example.org');
+	}
+
+	public function testAddThrowsForUnknownIdentiteit(): void {
+		$this->expectException(NietGevondenException::class);
+		$this->service->add(Uuid::v4()->toRfc4122(), 'email', 'jan@example.org');
+	}
+
+	/**
+	 * @return array<string, array{string, string}>
+	 */
+	public static function invalidContactgegevens(): array {
+		return [
+			'unknown soort' => ['telefoonnummer', '0612345678'],
+			'empty waarde' => ['email', ''],
+			'not an email address' => ['email', 'jan'],
+			'longer than 254 characters' => ['email', str_repeat('a', 64) . '@' . str_repeat('b', 63) . '.' . str_repeat('c', 63) . '.' . str_repeat('d', 60) . '.nl'],
+		];
+	}
+
+	#[DataProvider('invalidContactgegevens')]
+	public function testAddRejectsInvalidInput(string $soort, string $waarde): void {
+		$this->expectException(OngeldigeInvoerException::class);
+		$this->service->add($this->identiteit->getUuid(), $soort, $waarde);
 	}
 
 	private function insert(string $waarde, ?DateTimeImmutable $geverifieerdOp = null, bool $isPrimair = false): Contactgegeven {

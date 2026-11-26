@@ -64,7 +64,6 @@ class ContactgegevenMapper extends QBMapper {
 	 * Whether the identiteit already has this waarde for this soort, compared case-insensitively.
 	 *
 	 * @throws Exception
-	 * @psalm-suppress PossiblyUnusedMethod Used by the API, which is not built yet.
 	 */
 	public function existsWaarde(int $identiteitId, string $soort, string $waarde): bool {
 		$qb = $this->db->getQueryBuilder();
