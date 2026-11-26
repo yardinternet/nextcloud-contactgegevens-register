@@ -139,6 +139,17 @@ class ContactgegevenService {
 	}
 
 	/**
+	 * Forgets a contactgegeven: a hard delete. When it was the primary one, the identiteit has none until the
+	 * client makes another one primary (ADR 0007).
+	 *
+	 * @throws NietGevondenException
+	 * @throws Exception
+	 */
+	public function delete(string $uuid): void {
+		$this->mapper->delete($this->findContactgegeven($uuid));
+	}
+
+	/**
 	 * @throws OngeldigeInvoerException
 	 */
 	private function validate(string $soort, string $waarde): void {

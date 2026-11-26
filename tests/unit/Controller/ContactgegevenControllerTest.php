@@ -10,6 +10,7 @@ use OCA\ContactgegevensRegister\Exception\NietGevondenException;
 use OCA\ContactgegevensRegister\Exception\OngeldigeInvoerException;
 use OCA\ContactgegevensRegister\Service\ContactgegevenService;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -129,6 +130,24 @@ final class ContactgegevenControllerTest extends TestCase {
 		$response = $this->controller->makePrimair(self::CONTACTGEGEVEN['uuid']);
 
 		$this->assertSame(Http::STATUS_NOT_FOUND, $response->getStatus());
+		$this->assertSame(['message' => 'Contactgegeven not found'], $response->getData());
+	}
+
+	public function testDestroyReturns204(): void {
+		$this->service->expects($this->once())->method('delete')->with(self::CONTACTGEGEVEN['uuid']);
+
+		$response = $this->controller->destroy(self::CONTACTGEGEVEN['uuid']);
+
+		$this->assertSame(Http::STATUS_NO_CONTENT, $response->getStatus());
+	}
+
+	public function testDestroyReturns404ForUnknownContactgegeven(): void {
+		$this->service->method('delete')->willThrowException(new NietGevondenException('Contactgegeven not found'));
+
+		$response = $this->controller->destroy(self::CONTACTGEGEVEN['uuid']);
+
+		$this->assertSame(Http::STATUS_NOT_FOUND, $response->getStatus());
+		$this->assertInstanceOf(JSONResponse::class, $response);
 		$this->assertSame(['message' => 'Contactgegeven not found'], $response->getData());
 	}
 }

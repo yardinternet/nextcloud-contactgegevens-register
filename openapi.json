@@ -338,6 +338,51 @@
                 }
             }
         },
+        "/index.php/apps/contactgegevensregister/api/v1/contactgegevens/{uuid}": {
+            "delete": {
+                "operationId": "contactgegeven-destroy",
+                "summary": "Forget a contactgegeven",
+                "description": "The contactgegeven is deleted. When it was the primary one, the identiteit has none until another one is made primary.",
+                "tags": [
+                    "contactgegeven"
+                ],
+                "security": [
+                    {},
+                    {
+                        "bearer_auth": []
+                    },
+                    {
+                        "basic_auth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "UUID of the contactgegeven",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Contactgegeven deleted"
+                    },
+                    "404": {
+                        "description": "Contactgegeven not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/index.php/apps/contactgegevensregister/api/v1/identiteiten": {
             "post": {
                 "operationId": "identiteit-create",

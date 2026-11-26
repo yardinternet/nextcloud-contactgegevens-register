@@ -17,6 +17,7 @@ use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\OpenAPI;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\Http\Response;
 use OCP\IRequest;
 
 /**
@@ -130,5 +131,30 @@ final class ContactgegevenController extends ApiController {
 		} catch (NietGevondenException $e) {
 			return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
 		}
+	}
+
+	/**
+	 * Forget a contactgegeven
+	 *
+	 * The contactgegeven is deleted. When it was the primary one, the identiteit has none until another one is made
+	 * primary.
+	 *
+	 * @param string $uuid UUID of the contactgegeven
+	 * @return Response<Http::STATUS_NO_CONTENT, array{}>|JSONResponse<Http::STATUS_NOT_FOUND, ContactgegevensRegisterFout, array{}>
+	 *
+	 * 204: Contactgegeven deleted
+	 * 404: Contactgegeven not found
+	 */
+	#[PublicPage]
+	#[NoCSRFRequired]
+	#[FrontpageRoute(verb: 'DELETE', url: '/api/v1/contactgegevens/{uuid}')]
+	public function destroy(string $uuid): Response {
+		try {
+			$this->service->delete($uuid);
+		} catch (NietGevondenException $e) {
+			return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
+		}
+
+		return new Response(Http::STATUS_NO_CONTENT);
 	}
 }

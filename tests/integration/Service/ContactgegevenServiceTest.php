@@ -14,6 +14,7 @@ use OCA\ContactgegevensRegister\Exception\DubbelContactgegevenException;
 use OCA\ContactgegevensRegister\Exception\NietGevondenException;
 use OCA\ContactgegevensRegister\Exception\OngeldigeInvoerException;
 use OCA\ContactgegevensRegister\Service\ContactgegevenService;
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\Server;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
@@ -192,6 +193,31 @@ final class ContactgegevenServiceTest extends TestCase {
 	public function testMakePrimairThrowsForUnknownContactgegeven(): void {
 		$this->expectException(NietGevondenException::class);
 		$this->service->makePrimair(Uuid::v4()->toRfc4122());
+	}
+
+	public function testDeleteKeepsTheIdentiteitAndPicksNoNewPrimary(): void {
+		$primair = $this->insert('a@example.org', isPrimair: true);
+		$overige = $this->insert('b@example.org');
+
+		$this->service->delete($primair->getUuid());
+
+		$this->assertSame([$overige->getUuid()], array_column($this->service->findByIdentiteit($this->identiteit->getUuid()), 'uuid'));
+		$this->assertFalse($this->mapper->findByUuid($overige->getUuid())->getIsPrimair());
+		$this->expectException(DoesNotExistException::class);
+		$this->mapper->findByUuid($primair->getUuid());
+	}
+
+	public function testDeletingTheLastContactgegevenKeepsTheIdentiteit(): void {
+		$contactgegeven = $this->insert('a@example.org');
+
+		$this->service->delete($contactgegeven->getUuid());
+
+		$this->assertSame([], $this->service->findByIdentiteit($this->identiteit->getUuid()));
+	}
+
+	public function testDeleteThrowsForUnknownContactgegeven(): void {
+		$this->expectException(NietGevondenException::class);
+		$this->service->delete(Uuid::v4()->toRfc4122());
 	}
 
 	private function insert(string $waarde, ?DateTimeImmutable $geverifieerdOp = null, bool $isPrimair = false): Contactgegeven {
