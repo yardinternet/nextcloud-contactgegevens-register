@@ -6,9 +6,11 @@ namespace OCA\ContactgegevensRegister\Tests\Unit\Controller;
 
 use OCA\ContactgegevensRegister\Controller\IdentiteitController;
 use OCA\ContactgegevensRegister\Db\Identiteit;
+use OCA\ContactgegevensRegister\Exception\NietGevondenException;
 use OCA\ContactgegevensRegister\Exception\OngeldigeInvoerException;
 use OCA\ContactgegevensRegister\Service\IdentiteitService;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -60,6 +62,24 @@ final class IdentiteitControllerTest extends TestCase {
 
 		$this->assertSame(Http::STATUS_BAD_REQUEST, $response->getStatus());
 		$this->assertSame(['message' => 'hmac must be 64 lowercase hexadecimal characters'], $response->getData());
+	}
+
+	public function testDestroyReturns204(): void {
+		$this->service->expects($this->once())->method('delete')->with(self::UUID);
+
+		$response = $this->controller->destroy(self::UUID);
+
+		$this->assertSame(Http::STATUS_NO_CONTENT, $response->getStatus());
+	}
+
+	public function testDestroyReturns404ForUnknownUuid(): void {
+		$this->service->method('delete')->willThrowException(new NietGevondenException('Identiteit not found'));
+
+		$response = $this->controller->destroy(self::UUID);
+
+		$this->assertSame(Http::STATUS_NOT_FOUND, $response->getStatus());
+		$this->assertInstanceOf(JSONResponse::class, $response);
+		$this->assertSame(['message' => 'Identiteit not found'], $response->getData());
 	}
 
 	private function identiteit(): Identiteit {

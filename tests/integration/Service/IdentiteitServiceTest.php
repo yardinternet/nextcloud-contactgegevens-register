@@ -6,10 +6,14 @@ namespace OCA\ContactgegevensRegister\Tests\Integration\Service;
 
 use DateTimeImmutable;
 use DateTimeZone;
+use OCA\ContactgegevensRegister\Db\Contactgegeven;
+use OCA\ContactgegevensRegister\Db\ContactgegevenMapper;
 use OCA\ContactgegevensRegister\Db\Identiteit;
 use OCA\ContactgegevensRegister\Db\IdentiteitMapper;
+use OCA\ContactgegevensRegister\Exception\NietGevondenException;
 use OCA\ContactgegevensRegister\Exception\OngeldigeInvoerException;
 use OCA\ContactgegevensRegister\Service\IdentiteitService;
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\Server;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
@@ -112,6 +116,28 @@ final class IdentiteitServiceTest extends TestCase {
 	public function testRejectsInvalidInput(string $hmac, ?string $vorigeHmac): void {
 		$this->expectException(OngeldigeInvoerException::class);
 		$this->service->findOrCreate($hmac, $vorigeHmac);
+	}
+
+	public function testDeleteRemovesTheIdentiteitAndItsContactgegevens(): void {
+		$identiteit = $this->insert($this->hmac(), new DateTimeImmutable('now', new DateTimeZone('UTC')));
+		$contactgegevenMapper = Server::get(ContactgegevenMapper::class);
+		$contactgegeven = new Contactgegeven();
+		$contactgegeven->setUuid(Uuid::v4()->toRfc4122());
+		$contactgegeven->setIdentiteitId($identiteit->getId());
+		$contactgegeven->setSoort('email');
+		$contactgegeven->setWaarde('jan@example.org');
+		$contactgegevenMapper->insert($contactgegeven);
+
+		$this->service->delete($identiteit->getUuid());
+
+		$this->assertSame([], $contactgegevenMapper->findByIdentiteit($identiteit->getId()));
+		$this->expectException(DoesNotExistException::class);
+		$this->mapper->findByUuid($identiteit->getUuid());
+	}
+
+	public function testDeleteThrowsForUnknownUuid(): void {
+		$this->expectException(NietGevondenException::class);
+		$this->service->delete(Uuid::v4()->toRfc4122());
 	}
 
 	/**

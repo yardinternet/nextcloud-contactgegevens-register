@@ -7,6 +7,7 @@ namespace OCA\ContactgegevensRegister\Service;
 use DateTimeZone;
 use OCA\ContactgegevensRegister\Db\Identiteit;
 use OCA\ContactgegevensRegister\Db\IdentiteitMapper;
+use OCA\ContactgegevensRegister\Exception\NietGevondenException;
 use OCA\ContactgegevensRegister\Exception\OngeldigeInvoerException;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\TTransactional;
@@ -55,6 +56,21 @@ class IdentiteitService {
 			// Another request created or re-keyed an identiteit with this hmac at the same moment: return that one.
 			return ['identiteit' => $this->mapper->findByHmac($hmac), 'aangemaakt' => false];
 		}
+	}
+
+	/**
+	 * Deletes an identiteit. The foreign key deletes its contactgegevens.
+	 *
+	 * @throws NietGevondenException
+	 * @throws Exception
+	 */
+	public function delete(string $uuid): void {
+		try {
+			$identiteit = $this->mapper->findByUuid($uuid);
+		} catch (DoesNotExistException) {
+			throw new NietGevondenException('Identiteit not found');
+		}
+		$this->mapper->delete($identiteit);
 	}
 
 	/**

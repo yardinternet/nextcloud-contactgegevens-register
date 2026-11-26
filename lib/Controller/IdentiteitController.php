@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\ContactgegevensRegister\Controller;
 
 use OCA\ContactgegevensRegister\AppInfo\Application;
+use OCA\ContactgegevensRegister\Exception\NietGevondenException;
 use OCA\ContactgegevensRegister\Exception\OngeldigeInvoerException;
 use OCA\ContactgegevensRegister\ResponseDefinitions;
 use OCA\ContactgegevensRegister\Service\IdentiteitService;
@@ -15,6 +16,7 @@ use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\OpenAPI;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\Http\Response;
 use OCP\IRequest;
 
 /**
@@ -61,5 +63,27 @@ final class IdentiteitController extends ApiController {
 			$result['identiteit']->jsonSerialize(),
 			$result['aangemaakt'] ? Http::STATUS_CREATED : Http::STATUS_OK,
 		);
+	}
+
+	/**
+	 * Delete an identiteit and its contactgegevens
+	 *
+	 * @param string $uuid UUID of the identiteit
+	 * @return Response<Http::STATUS_NO_CONTENT, array{}>|JSONResponse<Http::STATUS_NOT_FOUND, ContactgegevensRegisterFout, array{}>
+	 *
+	 * 204: Identiteit deleted
+	 * 404: Identiteit not found
+	 */
+	#[PublicPage]
+	#[NoCSRFRequired]
+	#[FrontpageRoute(verb: 'DELETE', url: '/api/v1/identiteiten/{uuid}')]
+	public function destroy(string $uuid): Response {
+		try {
+			$this->service->delete($uuid);
+		} catch (NietGevondenException $e) {
+			return new JSONResponse(['message' => $e->getMessage()], Http::STATUS_NOT_FOUND);
+		}
+
+		return new Response(Http::STATUS_NO_CONTENT);
 	}
 }
