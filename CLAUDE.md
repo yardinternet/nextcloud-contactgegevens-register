@@ -27,36 +27,6 @@ Project rules for the Contactgegevens Register Nextcloud app. These override the
   - If signing fails (e.g. pinentry can't prompt in a non-interactive session), stop and tell Marc. Never bypass it
     with `--no-gpg-sign` or `-c commit.gpgsign=false`.
 
-## License headers
-
-- **Every source file starts with an SPDX header**: `{year}` is the year the file was created, `{name}` the developer
-  creating it (`git config user.name`, e.g. `Marc Schwartz`). Don't change the header of existing files.
-- Applies to code and markup: PHP, JS/TS, Vue, CSS/SCSS, XML (incl. `info.xml`, `psalm.xml`, `phpunit.xml`), SVG.
-  Not to JSON, lock files, Markdown, `LICENSE`, dotfiles like `.gitignore`, `.gitkeep`, or generated files
-  (`openapi.json`, built `js/`).
-- Use the file type's comment syntax:
-  - PHP — below the `<?php` tag after one blank line (php-cs-fixer enforces it), before
-    `declare(strict_types=1);`:
-    ```php
-    <?php
-
-    /**
-     * SPDX-FileCopyrightText: {year} {name}
-     * SPDX-License-Identifier: AGPL-3.0-or-later
-     */
-
-    declare(strict_types=1);
-    ```
-  - JS/TS/CSS — the same `/** … */` block at the top of the file.
-  - XML — after the `<?xml …?>` declaration; Vue — at the very top:
-    ```xml
-    <!--
-      - SPDX-FileCopyrightText: {year} {name}
-      - SPDX-License-Identifier: AGPL-3.0-or-later
-    -->
-    ```
-  - SVG — as a comment directly inside the opening `<svg>` tag.
-
 ## Naming
 
 - **Domain entities are named in Dutch** (e.g. `Contactgegeven`, `Burger`), including their mappers, services and
