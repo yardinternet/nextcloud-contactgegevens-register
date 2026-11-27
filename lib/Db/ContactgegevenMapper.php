@@ -13,7 +13,6 @@ use OCP\IDBConnection;
 
 /**
  * @template-extends QBMapper<Contactgegeven>
- * @psalm-suppress UnusedClass Used by the API, which is not built yet.
  */
 class ContactgegevenMapper extends QBMapper {
 	public const string TABLE = 'cgr_contactgegeven';
@@ -27,7 +26,6 @@ class ContactgegevenMapper extends QBMapper {
 	 * @throws DoesNotExistException
 	 * @throws MultipleObjectsReturnedException
 	 * @throws Exception
-	 * @psalm-suppress PossiblyUnusedMethod Used by the API, which is not built yet.
 	 */
 	public function findByUuid(string $uuid): Contactgegeven {
 		$qb = $this->db->getQueryBuilder();
@@ -44,7 +42,6 @@ class ContactgegevenMapper extends QBMapper {
 	 * @param bool|null $geverifieerd true: only verified ones, false: only unverified ones, null: all
 	 * @return list<Contactgegeven>
 	 * @throws Exception
-	 * @psalm-suppress PossiblyUnusedMethod Used by the API, which is not built yet.
 	 */
 	public function findByIdentiteit(int $identiteitId, ?bool $geverifieerd = null): array {
 		$qb = $this->db->getQueryBuilder();
@@ -66,7 +63,6 @@ class ContactgegevenMapper extends QBMapper {
 	 * Whether the identiteit already has this waarde for this soort, compared case-insensitively.
 	 *
 	 * @throws Exception
-	 * @psalm-suppress PossiblyUnusedMethod Used by the API, which is not built yet.
 	 */
 	public function existsWaarde(int $identiteitId, string $soort, string $waarde): bool {
 		$qb = $this->db->getQueryBuilder();
@@ -91,7 +87,6 @@ class ContactgegevenMapper extends QBMapper {
 	 * The primary contactgegeven of an identiteit for a soort, if there is one.
 	 *
 	 * @throws Exception
-	 * @psalm-suppress PossiblyUnusedMethod Used by the API, which is not built yet.
 	 */
 	public function findPrimair(int $identiteitId, string $soort): ?Contactgegeven {
 		$qb = $this->db->getQueryBuilder();

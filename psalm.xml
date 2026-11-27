@@ -23,11 +23,15 @@
 	<extraFiles>
 		<directory name="vendor"/>
 	</extraFiles>
+	<stubs>
+		<file name="tests/stubs/symfony-uid.php"/>
+	</stubs>
 	<issueHandlers>
-		<!-- Mappers are mocked in unit tests, which PHPUnit can't do for final classes -->
+		<!-- Mappers and services are mocked in unit tests, which PHPUnit can't do for final classes -->
 		<ClassMustBeFinal>
 			<errorLevel type="suppress">
 				<directory name="lib/Db"/>
+				<directory name="lib/Service"/>
 			</errorLevel>
 		</ClassMustBeFinal>
 		<!-- nextcloud/ocp 34 doesn't ship Doctrine, which ISchemaWrapper returns in migrations; 35 returns

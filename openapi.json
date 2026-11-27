@@ -20,26 +20,56 @@
             }
         },
         "schemas": {
-            "OCSMeta": {
+            "Contactgegeven": {
                 "type": "object",
                 "required": [
-                    "status",
-                    "statuscode"
+                    "uuid",
+                    "identiteit",
+                    "soort",
+                    "waarde",
+                    "geverifieerdOp",
+                    "isPrimair"
                 ],
                 "properties": {
-                    "status": {
+                    "uuid": {
                         "type": "string"
                     },
-                    "statuscode": {
-                        "type": "integer"
+                    "identiteit": {
+                        "type": "string"
                     },
+                    "soort": {
+                        "type": "string"
+                    },
+                    "waarde": {
+                        "type": "string"
+                    },
+                    "geverifieerdOp": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "isPrimair": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "Fout": {
+                "type": "object",
+                "required": [
+                    "message"
+                ],
+                "properties": {
                     "message": {
                         "type": "string"
-                    },
-                    "totalitems": {
-                        "type": "string"
-                    },
-                    "itemsperpage": {
+                    }
+                }
+            },
+            "Identiteit": {
+                "type": "object",
+                "required": [
+                    "uuid"
+                ],
+                "properties": {
+                    "uuid": {
                         "type": "string"
                     }
                 }
@@ -47,14 +77,15 @@
         }
     },
     "paths": {
-        "/ocs/v2.php/apps/contactgegevensregister/api": {
+        "/index.php/apps/contactgegevensregister/api/v1/identiteiten/{uuid}/contactgegevens": {
             "get": {
-                "operationId": "api-index",
-                "summary": "An example API endpoint",
+                "operationId": "contactgegeven-index",
+                "summary": "List the contactgegevens of an identiteit",
                 "tags": [
-                    "api"
+                    "contactgegeven"
                 ],
                 "security": [
+                    {},
                     {
                         "bearer_auth": []
                     },
@@ -64,79 +95,407 @@
                 ],
                 "parameters": [
                     {
-                        "name": "OCS-APIRequest",
-                        "in": "header",
-                        "description": "Required to be true for the API request to pass",
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "UUID of the identiteit",
                         "required": true,
                         "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "isGeverifieerd",
+                        "in": "query",
+                        "description": "Only return verified contactgegevens",
+                        "schema": {
                             "type": "boolean",
-                            "default": true
+                            "default": false
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Data returned",
+                        "description": "Contactgegevens returned, oldest first",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "required": [
-                                        "ocs"
-                                    ],
-                                    "properties": {
-                                        "ocs": {
-                                            "type": "object",
-                                            "required": [
-                                                "meta",
-                                                "data"
-                                            ],
-                                            "properties": {
-                                                "meta": {
-                                                    "$ref": "#/components/schemas/OCSMeta"
-                                                },
-                                                "data": {
-                                                    "type": "object",
-                                                    "required": [
-                                                        "message"
-                                                    ],
-                                                    "properties": {
-                                                        "message": {
-                                                            "type": "string"
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Contactgegeven"
                                     }
                                 }
                             }
                         }
                     },
-                    "401": {
-                        "description": "Current user is not logged in",
+                    "404": {
+                        "description": "Identiteit not found",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "required": [
-                                        "ocs"
-                                    ],
-                                    "properties": {
-                                        "ocs": {
-                                            "type": "object",
-                                            "required": [
-                                                "meta",
-                                                "data"
-                                            ],
-                                            "properties": {
-                                                "meta": {
-                                                    "$ref": "#/components/schemas/OCSMeta"
-                                                },
-                                                "data": {}
-                                            }
-                                        }
+                                    "$ref": "#/components/schemas/Fout"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "contactgegeven-create",
+                "summary": "Add a contactgegeven to an identiteit",
+                "description": "The new contactgegeven is not verified. It becomes primary when the identiteit has no other contactgegeven of that soort.",
+                "tags": [
+                    "contactgegeven"
+                ],
+                "security": [
+                    {},
+                    {
+                        "bearer_auth": []
+                    },
+                    {
+                        "basic_auth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "soort",
+                                    "waarde"
+                                ],
+                                "properties": {
+                                    "soort": {
+                                        "type": "string",
+                                        "description": "Kind of contactgegeven, only `email` for now"
+                                    },
+                                    "waarde": {
+                                        "type": "string",
+                                        "description": "The email address"
                                     }
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "UUID of the identiteit",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Contactgegeven added",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Contactgegeven"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid soort or waarde",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Identiteit not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "The identiteit already has this waarde, compared case-insensitively",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/index.php/apps/contactgegevensregister/api/v1/contactgegevens/{uuid}/verifieer": {
+            "post": {
+                "operationId": "contactgegeven-verify",
+                "summary": "Mark a contactgegeven as verified",
+                "description": "The register sets today's date (UTC). Repeating it keeps the original date; verification can't be undone.",
+                "tags": [
+                    "contactgegeven"
+                ],
+                "security": [
+                    {},
+                    {
+                        "bearer_auth": []
+                    },
+                    {
+                        "basic_auth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "UUID of the contactgegeven",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contactgegeven verified",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Contactgegeven"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Contactgegeven not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/index.php/apps/contactgegevensregister/api/v1/contactgegevens/{uuid}/primair": {
+            "post": {
+                "operationId": "contactgegeven-make-primair",
+                "summary": "Make a contactgegeven the primary one",
+                "description": "Clears the flag on the current primary contactgegeven of the same identiteit and soort. It doesn't have to be verified. Repeating it changes nothing.",
+                "tags": [
+                    "contactgegeven"
+                ],
+                "security": [
+                    {},
+                    {
+                        "bearer_auth": []
+                    },
+                    {
+                        "basic_auth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "UUID of the contactgegeven",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contactgegeven is the primary one",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Contactgegeven"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Contactgegeven not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/index.php/apps/contactgegevensregister/api/v1/contactgegevens/{uuid}": {
+            "delete": {
+                "operationId": "contactgegeven-destroy",
+                "summary": "Forget a contactgegeven",
+                "description": "The contactgegeven is deleted. When it was the primary one, the identiteit has none until another one is made primary.",
+                "tags": [
+                    "contactgegeven"
+                ],
+                "security": [
+                    {},
+                    {
+                        "bearer_auth": []
+                    },
+                    {
+                        "basic_auth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "UUID of the contactgegeven",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Contactgegeven deleted"
+                    },
+                    "404": {
+                        "description": "Contactgegeven not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/index.php/apps/contactgegevensregister/api/v1/identiteiten": {
+            "post": {
+                "operationId": "identiteit-create",
+                "summary": "Find or create the identiteit of an HMAC",
+                "description": "During a key rotation the client also sends the HMAC of the previous key. An identiteit that only has that HMAC is re-keyed and keeps its UUID.",
+                "tags": [
+                    "identiteit"
+                ],
+                "security": [
+                    {},
+                    {
+                        "bearer_auth": []
+                    },
+                    {
+                        "basic_auth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "hmac"
+                                ],
+                                "properties": {
+                                    "hmac": {
+                                        "type": "string",
+                                        "description": "HMAC-SHA256 of the login identifier, 64 lowercase hexadecimal characters"
+                                    },
+                                    "vorigeHmac": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "default": null,
+                                        "description": "HMAC of the login identifier with the previous key, only during a key rotation"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Existing identiteit found or re-keyed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Identiteit"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Identiteit created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Identiteit"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid HMAC, or vorigeHmac equals hmac",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/index.php/apps/contactgegevensregister/api/v1/identiteiten/{uuid}": {
+            "delete": {
+                "operationId": "identiteit-destroy",
+                "summary": "Delete an identiteit and its contactgegevens",
+                "tags": [
+                    "identiteit"
+                ],
+                "security": [
+                    {},
+                    {
+                        "bearer_auth": []
+                    },
+                    {
+                        "basic_auth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "UUID of the identiteit",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Identiteit deleted"
+                    },
+                    "404": {
+                        "description": "Identiteit not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Fout"
                                 }
                             }
                         }
@@ -145,5 +504,14 @@
             }
         }
     },
-    "tags": []
+    "tags": [
+        {
+            "name": "contactgegeven",
+            "description": "The endpoints are public until the token system is added (ADR 0001 requires access to be denied by default)."
+        },
+        {
+            "name": "identiteit",
+            "description": "The endpoints are public until the token system is added (ADR 0001 requires access to be denied by default)."
+        }
+    ]
 }

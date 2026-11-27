@@ -14,7 +14,6 @@ use OCP\IDBConnection;
 
 /**
  * @template-extends QBMapper<Identiteit>
- * @psalm-suppress UnusedClass Used by the API and the purge, which are not built yet.
  */
 class IdentiteitMapper extends QBMapper {
 	public const string TABLE = 'cgr_identiteit';
@@ -31,7 +30,6 @@ class IdentiteitMapper extends QBMapper {
 	 * @throws DoesNotExistException
 	 * @throws MultipleObjectsReturnedException
 	 * @throws Exception
-	 * @psalm-suppress PossiblyUnusedMethod Used by the API, which is not built yet.
 	 */
 	public function findById(int $id): Identiteit {
 		$qb = $this->db->getQueryBuilder();
@@ -46,7 +44,6 @@ class IdentiteitMapper extends QBMapper {
 	 * @throws DoesNotExistException
 	 * @throws MultipleObjectsReturnedException
 	 * @throws Exception
-	 * @psalm-suppress PossiblyUnusedMethod Used by the API, which is not built yet.
 	 */
 	public function findByUuid(string $uuid): Identiteit {
 		$qb = $this->db->getQueryBuilder();
@@ -61,7 +58,6 @@ class IdentiteitMapper extends QBMapper {
 	 * @throws DoesNotExistException
 	 * @throws MultipleObjectsReturnedException
 	 * @throws Exception
-	 * @psalm-suppress PossiblyUnusedMethod Used by the API, which is not built yet.
 	 */
 	public function findByHmac(string $hmac): Identiteit {
 		$qb = $this->db->getQueryBuilder();
