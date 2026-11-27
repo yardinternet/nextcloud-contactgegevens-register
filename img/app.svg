@@ -1,6 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-	<!-- SPDX-FileCopyrightText: 2026 Marc Schwartz -->
-	<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 	<g fill="white">
 		<circle cx="8" cy="6" r="4"/>
 		<path d="M1 21V18.5C1 15.2 4.3 13 8 13C8.8 13 9.4 13.07 10 13.2V21Z"/>
