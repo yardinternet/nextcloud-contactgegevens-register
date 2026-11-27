@@ -11,6 +11,7 @@
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
     findUnusedBaselineEntry="true"
     findUnusedCode="true"
+    findUnusedIssueHandlerSuppression="false"
 	phpVersion="8.3"
 >
     <projectFiles>
@@ -22,4 +23,19 @@
 	<extraFiles>
 		<directory name="vendor"/>
 	</extraFiles>
+	<issueHandlers>
+		<!-- Mappers are mocked in unit tests, which PHPUnit can't do for final classes -->
+		<ClassMustBeFinal>
+			<errorLevel type="suppress">
+				<directory name="lib/Db"/>
+			</errorLevel>
+		</ClassMustBeFinal>
+		<!-- nextcloud/ocp 34 doesn't ship Doctrine, which ISchemaWrapper returns in migrations; 35 returns
+		     OCP\DB\Schema\ITable instead, so findUnusedIssueHandlerSuppression is off to pass on both -->
+		<UndefinedDocblockClass>
+			<errorLevel type="suppress">
+				<referencedClass name="Doctrine\DBAL\Schema\Table"/>
+			</errorLevel>
+		</UndefinedDocblockClass>
+	</issueHandlers>
 </psalm>
